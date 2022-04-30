@@ -17,17 +17,17 @@ const db = mysql.createConnection(
   console.log('Connected to the election database.')
 );
 
-db.query(`SELECT * FROM candidates`, (err, rows) => {
-  console.log(rows);
-});
+// db.query(`SELECT * FROM candidates`, (err, rows) => {
+//   console.log(rows);
+// });
 
 // GET a single candidate
-db.query(`SELECT * FROM candidates WHERE id = 1`, (err, row) => {
-  if (err) {
-    console.log(err);
-  }
-  console.log(row);
-});
+// db.query(`SELECT * FROM candidates WHERE id = 1`, (err, row) => {
+//   if (err) {
+//     console.log(err);
+//   }
+//   console.log(row);
+// });
 
 // Delete a candidate
 // The '?' is considered a prepared statement, the end results would be - 'DELETE FROM candidates WHERE id = 1'
@@ -39,15 +39,48 @@ db.query(`SELECT * FROM candidates WHERE id = 1`, (err, row) => {
 // });
 
 // Create a candidate
-const sql = `INSERT INTO candidates (id, first_name, last_name, industry_connected) 
-              VALUES (?,?,?,?)`;
-const params = [1, 'Ronald', 'Firbank', 1];
+// const sql = `INSERT INTO candidates (id, first_name, last_name, industry_connected)
+//               VALUES (?,?,?,?)`;
+// const params = [1, 'Ronald', 'Firbank', 1];
 
-db.query(sql, params, (err, result) => {
-  if (err) {
-    console.log(err);
-  }
-  console.log(result);
+// db.query(sql, params, (err, result) => {
+//   if (err) {
+//     console.log(err);
+//   }
+//   console.log(result);
+// });
+
+// Get all candidates
+app.get('/api/candidates', (req, res) => {
+  const sql = `SELECT * FROM candidates`;
+
+  db.query(sql, (err, rows) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+      return;
+    }
+    res.json({
+      message: 'success',
+      data: rows,
+    });
+  });
+});
+
+// Get a single candidate
+app.get('/api/candidate/:id', (req, res) => {
+  const sql = `SELECT * FROM candidates WHERE id = ?`;
+  const params = [req.params.id];
+
+  db.query(sql, params, (err, row) => {
+    if (err) {
+      res.status(400).json({ error: err.message });
+      return;
+    }
+    res.json({
+      message: 'success',
+      data: row,
+    });
+  });
 });
 
 // Express middleware
