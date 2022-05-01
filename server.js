@@ -17,6 +17,8 @@ const db = mysql.createConnection(
   console.log('Connected to the election database.')
 );
 
+// ---- ---- ---- ---- ---- ---- ---- HERE ARE THE QUERY FUNCTIONS
+
 // db.query(`SELECT * FROM candidates`, (err, rows) => {
 //   console.log(rows);
 // });
@@ -50,36 +52,59 @@ const db = mysql.createConnection(
 //   console.log(result);
 // });
 
+// ---- ---- ---- ---- ---- ---- ---- HERE'S HOW WE USE THE QUERY FUNCTIONS IN OUR ROUTES
 // Get all candidates
-app.get('/api/candidates', (req, res) => {
-  const sql = `SELECT * FROM candidates`;
+// app.get('/api/candidates', (req, res) => {
+//   const sql = `SELECT * FROM candidates`;
 
-  db.query(sql, (err, rows) => {
-    if (err) {
-      res.status(500).json({ error: err.message });
-      return;
-    }
-    res.json({
-      message: 'success',
-      data: rows,
-    });
-  });
-});
+//   db.query(sql, (err, rows) => {
+//     if (err) {
+//       res.status(500).json({ error: err.message });
+//       return;
+//     }
+//     res.json({
+//       message: 'success',
+//       data: rows,
+//     });
+//   });
+// });
 
 // Get a single candidate
-app.get('/api/candidate/:id', (req, res) => {
-  const sql = `SELECT * FROM candidates WHERE id = ?`;
+// app.get('/api/candidate/:id', (req, res) => {
+//   const sql = `SELECT * FROM candidates WHERE id = ?`;
+//   const params = [req.params.id];
+
+//   db.query(sql, params, (err, row) => {
+//     if (err) {
+//       res.status(400).json({ error: err.message });
+//       return;
+//     }
+//     res.json({
+//       message: 'success',
+//       data: row,
+//     });
+//   });
+// });
+
+// Delete a candidate
+app.delete('/api/candidate/:id', (req, res) => {
+  const sql = `DELETE FROM candidates WHERE id = ?`;
   const params = [req.params.id];
 
-  db.query(sql, params, (err, row) => {
+  db.query(sql, params, (err, result) => {
     if (err) {
-      res.status(400).json({ error: err.message });
-      return;
+      res.statusMessage(400).json({ error: res.message });
+    } else if (!result.affectedRows) {
+      res.json({
+        message: 'Candidate not found',
+      });
+    } else {
+      res.json({
+        message: 'deleted',
+        changes: result.affectedRows,
+        id: req.params.id,
+      });
     }
-    res.json({
-      message: 'success',
-      data: row,
-    });
   });
 });
 
