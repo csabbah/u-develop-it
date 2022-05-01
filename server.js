@@ -115,6 +115,40 @@ app.get('/api/candidate/:id', (req, res) => {
   });
 });
 
+// Update a candidate's party (This will only change a candidates party_id value)
+// Note - if we try to update party_id with one that doesn't match, it will not work
+// By default, if the id doesn't match, the mysql1 npm package will display an error message
+app.put('/api/candidate/:id', (req, res) => {
+  // Check if a party_id was provided before attempting the below functions
+  // This will force the PUT request to include a party_id
+  const errors = inputCheck(req.body, 'party_id');
+
+  if (errors) {
+    res.status(400).json({ error: errors });
+    return;
+  }
+
+  const sql = `UPDATE candidates SET party_id = ? 
+               WHERE id = ?`;
+  const params = [req.body.party_id, req.params.id];
+  db.query(sql, params, (err, result) => {
+    if (err) {
+      res.status(400).json({ error: err.message });
+      // check if a record was found
+    } else if (!result.affectedRows) {
+      res.json({
+        message: 'Candidate not found',
+      });
+    } else {
+      res.json({
+        message: 'success',
+        data: req.body,
+        changes: result.affectedRows,
+      });
+    }
+  });
+});
+
 // Delete a candidate
 app.delete('/api/candidate/:id', (req, res) => {
   const sql = `DELETE FROM candidates WHERE id = ?`;
